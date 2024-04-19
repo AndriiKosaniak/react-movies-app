@@ -4,3 +4,4 @@ export * from "./MovieForm";
 export * from "./DeleteMovieConfirmation";
 export * from "./AddNewMovieButton";
 export * from "./RedirectButton";
+export * from "./SearchInput";

@@ -1,5 +1,8 @@
 # Getting Started with Create React App
 
+## Start the mock server
+### `npx json-server ./src/database/db.json`
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

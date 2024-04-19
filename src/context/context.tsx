@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 
 import { favouritesReducer, initialState } from "./favouritesReducer";
 
@@ -19,8 +19,24 @@ export const MoviesContext = createContext<MoviesContextType>({
 
 export const useMovieContext = () => useContext(MoviesContext);
 
+const loadStateFromLocalStorage = () => {
+  try {
+    const storedState = localStorage.getItem("context");
+    return storedState ? JSON.parse(storedState) : initialState;
+  } catch (error) {
+    return initialState;
+  }
+};
+
 export const ContextWrapper = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(favouritesReducer, initialState);
+  const [state, dispatch] = useReducer(
+    favouritesReducer,
+    loadStateFromLocalStorage()
+  );
+
+  useEffect(() => {
+    localStorage.setItem("context", JSON.stringify(state));
+  }, [state]);
 
   return (
     <MoviesContext.Provider value={{ state, dispatch }}>
@@ -28,6 +44,3 @@ export const ContextWrapper = ({ children }: { children: ReactNode }) => {
     </MoviesContext.Provider>
   );
 };
-
-// connect store with localStorage
-// write toggle instead of add/remove methods

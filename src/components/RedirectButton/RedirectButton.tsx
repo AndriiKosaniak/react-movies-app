@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -12,13 +12,14 @@ type RedirectButtonProps = {
 };
 
 export const RedirectButton = ({ route, buttonText }: RedirectButtonProps) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   return isMobile ? (
-    <IconButton onClick={() => redirect(route)}>
+    <IconButton onClick={() => navigate(route)}>
       <ArrowBackIcon />
     </IconButton>
   ) : (
-    <Button onClick={() => redirect(route)}>{buttonText}</Button>
+    <Button onClick={() => navigate(route)}>{buttonText}</Button>
   );
 };

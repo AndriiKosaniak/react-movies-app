@@ -4,7 +4,7 @@ import { Router } from "router";
 
 export const MoviesPageLayout = () => {
   return (
-    <Box padding={2}>
+    <Box height="100%" padding={2}>
       <Router />
     </Box>
   );

@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Formik, Form, Field } from "formik";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 
-import { AddNewMovieButton, Header, MovieForm } from "components";
+import { AddNewMovieButton, Header, MovieForm, SearchInput } from "components";
 import { SingleMoviePreview } from "./SingleMoviePreview";
-import { fetchMovies } from "api";
+import { addMovie, fetchMovies } from "api";
 
 import type { Movie } from "types";
 
@@ -25,7 +22,10 @@ export const MovieList = () => {
     queryFn: () => fetchMovies(),
   });
 
-  console.log("Movies:", movies);
+  const { mutate: addMutate, isPending: isAddPending } = useMutation({
+    mutationFn: (newMovieData: Movie) => addMovie(newMovieData),
+    onSuccess: () => refetch(),
+  });
 
   const [titleSearch, setTitleSearch] = useState("");
   const [isAddDialogOpened, setIsAddDialogOpened] = useState(false);
@@ -36,37 +36,13 @@ export const MovieList = () => {
     refetch();
   };
 
-  const SearchInput = () => {
-    return (
-      <Formik
-        initialValues={{ search: "" }}
-        onSubmit={(values) => {
-          setTitleSearch(values.search);
-        }}
-      >
-        <Form>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "15px",
-              marginY: "20px",
-            }}
-          >
-            <Field
-              as={TextField}
-              variant="outlined"
-              placeholder="Search for a movie..."
-              name="search"
-            />
-            <Button type="submit" variant="contained">
-              Search
-            </Button>
-          </Box>
-        </Form>
-      </Formik>
-    );
+  const handleAddMovieSubmit = (values: Movie) => {
+    addMutate(values);
+    handleAddDialogClose();
+  };
+
+  const handleSearchSubmit = (searchQuery: string) => {
+    setTitleSearch(searchQuery);
   };
 
   if (isPending)
@@ -89,7 +65,7 @@ export const MovieList = () => {
   return (
     <Box>
       <Header
-        center={<SearchInput />}
+        center={<SearchInput handleSubmit={handleSearchSubmit} />}
         right={<AddNewMovieButton handleClick={handleAddDialogOpen} />}
       />
 
@@ -107,7 +83,7 @@ export const MovieList = () => {
         ))}
       </Box>
       <Dialog open={isAddDialogOpened} onClose={handleAddDialogClose}>
-        <MovieForm handleClose={handleAddDialogClose} />
+        <MovieForm handleSubmit={handleAddMovieSubmit} isButtonLoading={isAddPending} />
       </Dialog>
     </Box>
   );

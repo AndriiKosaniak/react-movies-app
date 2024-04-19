@@ -1,6 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
 import { routes } from "router";
@@ -11,11 +11,12 @@ import type { Movie } from "types";
 type SingleMoviePreviewProps = { movie: Movie };
 
 export const SingleMoviePreview = ({ movie }: SingleMoviePreviewProps) => {
+  const releaseDate = new Date(movie.release_date).toLocaleDateString();
+
   return (
-    <Link
-      href={routes.movies + `/${movie.id}`}
-      underline="none"
-      color="inherit"
+    <Box
+      component={Link}
+      to={routes.movies + `/${movie.id}`}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -27,11 +28,15 @@ export const SingleMoviePreview = ({ movie }: SingleMoviePreviewProps) => {
         borderRadius: "20px",
 
         width: "400px",
+        textDecoration: "none",
+        color: "black",
+        textAlign: "center",
       }}
     >
       <Box component="img" src={movie.image} width="220px" />
       <Rating ratingScore={movie.rating} />
       <Typography variant="h4">{movie.title}</Typography>
-    </Link>
+      <Typography>{releaseDate}</Typography>
+    </Box>
   );
 };

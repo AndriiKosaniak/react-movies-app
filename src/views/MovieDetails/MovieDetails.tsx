@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useParams, redirect } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useMovieContext } from "context";
-import { fetchMovie } from "api";
+import { fetchMovie, editMovie, addMovie, deleteMovie } from "api";
 import { routes } from "router";
 import {
   Header,
@@ -28,6 +28,7 @@ import type { Movie } from "types";
 
 export const MovieDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const {
     isPending,
@@ -35,10 +36,23 @@ export const MovieDetails = () => {
     refetch,
     data: movie,
   } = useQuery<Movie>({
-    queryKey: ["movieList"],
+    queryKey: ["movie", id],
     queryFn: () => fetchMovie(id),
   });
 
+  const { mutate: addMutate, isPending: isAddPending } = useMutation({
+    mutationFn: (newMovieData: Movie) => addMovie(newMovieData),
+  });
+
+  const { mutate: editMutate, isPending: isEditPending } = useMutation({
+    mutationFn: (newMovieData: Movie) => editMovie(newMovieData, String(id)),
+    onSuccess: () => refetch(),
+  });
+
+  const { mutate: deleteMutate, isPending: isDeletePending } = useMutation({
+    mutationFn: () => deleteMovie(String(id)),
+    onSuccess: () => navigate(routes.movies),
+  });
   const { state, dispatch } = useMovieContext();
 
   const [isAddDialogOpened, setIsAddDialogOpened] = useState(false);
@@ -48,18 +62,30 @@ export const MovieDetails = () => {
   const handleAddDialogOpen = () => setIsAddDialogOpened(true);
   const handleAddDialogClose = () => {
     setIsAddDialogOpened(false);
-    refetch();
   };
 
   const handleEditDialogOpen = () => setIsEditDialogOpened(true);
   const handleEditDialogClose = () => {
     setIsEditDialogOpened(false);
-    refetch();
   };
   const handleDeleteDialogOpen = () => setIsDeleteDialogOpened(true);
   const handleDeleteDialogClose = () => {
     setIsDeleteDialogOpened(false);
-    redirect(routes.movies);
+  };
+
+  const handleEditMovieSubmit = (values: Movie) => {
+    editMutate(values);
+    handleEditDialogClose();
+  };
+
+  const handleAddMovieSubmit = (values: Movie) => {
+    addMutate(values);
+    handleAddDialogClose();
+  };
+
+  const handleDeleteMovieSubmit = () => {
+    deleteMutate();
+    handleDeleteDialogClose();
   };
 
   if (isPending)
@@ -101,14 +127,16 @@ export const MovieDetails = () => {
           <Typography>Director:</Typography>
           <Typography fontWeight="bold">{movie.director}</Typography>
         </Box>
-        <Box display="flex" flexWrap="wrap" gap="5px">
-          <Typography>Actors:</Typography>
-          {movie.actors.map((actor) => (
-            <Typography key={actor} fontWeight="bold">
-              {actor};
-            </Typography>
-          ))}
-        </Box>
+        {movie.actors.length && (
+          <Box display="flex" flexWrap="wrap" gap="5px">
+            <Typography>Actors:</Typography>
+            {movie.actors.map((actor) => (
+              <Typography key={actor} fontWeight="bold">
+                {actor};
+              </Typography>
+            ))}
+          </Box>
+        )}
         <Box>
           <IconButton
             onClick={() =>
@@ -130,15 +158,23 @@ export const MovieDetails = () => {
         </Box>
       </Box>
       <Dialog open={isAddDialogOpened} onClose={handleAddDialogClose}>
-        <MovieForm handleClose={handleAddDialogClose} />
+        <MovieForm
+          handleSubmit={handleAddMovieSubmit}
+          isButtonLoading={isAddPending}
+        />
       </Dialog>
       <Dialog open={isEditDialogOpened} onClose={handleEditDialogClose}>
-        <MovieForm initialValues={movie} handleClose={handleEditDialogClose} />
+        <MovieForm
+          initialValues={movie}
+          handleSubmit={handleEditMovieSubmit}
+          isButtonLoading={isEditPending}
+        />
       </Dialog>
       <Dialog open={isDeleteDialogOpened} onClose={handleDeleteDialogClose}>
         <DeleteMovieConfirmation
-          movieId={movie.id}
-          handleClose={handleDeleteDialogClose}
+          handleSubmit={handleDeleteMovieSubmit}
+          handleCancel={handleDeleteDialogClose}
+          isButtonLoading={isDeletePending}
         />
       </Dialog>
     </Box>
