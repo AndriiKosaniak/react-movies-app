@@ -95,7 +95,7 @@ export const MovieDetails = () => {
       </Stack>
     );
 
-  if (error) return <div>Error: {error.message}</div>;
+  if (error) return <Typography>Error: {error.message}</Typography>;
 
   const isMovieAlreaddyAddedToFavourites = state.favouriteMovies.find(
     (favourite) => favourite.id === movie.id
@@ -133,6 +133,16 @@ export const MovieDetails = () => {
             {movie.actors.map((actor) => (
               <Typography key={actor} fontWeight="bold">
                 {actor};
+              </Typography>
+            ))}
+          </Box>
+        )}
+        {movie.genre.length && (
+          <Box display="flex" flexWrap="wrap" gap="5px">
+            <Typography>Genres:</Typography>
+            {movie.genre.map((genre) => (
+              <Typography key={genre} fontWeight="bold">
+                {genre};
               </Typography>
             ))}
           </Box>

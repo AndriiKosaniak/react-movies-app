@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
@@ -45,6 +46,18 @@ export const MovieList = () => {
     setTitleSearch(searchQuery);
   };
 
+  const filteredMovies = useMemo(
+    () =>
+      titleSearch
+        ? movies?.filter((movie) =>
+            movie.title
+              .toLocaleLowerCase()
+              .includes(titleSearch.toLocaleLowerCase())
+          )
+        : movies,
+    [movies, titleSearch]
+  );
+
   if (isPending)
     return (
       <Stack>
@@ -52,15 +65,7 @@ export const MovieList = () => {
       </Stack>
     );
 
-  if (error) return <div>Error: {error.message}</div>;
-
-  const filteredMovies = titleSearch
-    ? movies.filter((movie) =>
-        movie.title
-          .toLocaleLowerCase()
-          .includes(titleSearch.toLocaleLowerCase())
-      )
-    : movies;
+  if (error) return <Typography>Error: {error.message}</Typography>;
 
   return (
     <Box>
@@ -83,7 +88,10 @@ export const MovieList = () => {
         ))}
       </Box>
       <Dialog open={isAddDialogOpened} onClose={handleAddDialogClose}>
-        <MovieForm handleSubmit={handleAddMovieSubmit} isButtonLoading={isAddPending} />
+        <MovieForm
+          handleSubmit={handleAddMovieSubmit}
+          isButtonLoading={isAddPending}
+        />
       </Dialog>
     </Box>
   );

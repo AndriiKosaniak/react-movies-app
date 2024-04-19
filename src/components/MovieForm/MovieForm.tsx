@@ -146,6 +146,44 @@ export const MovieForm = ({
               />
               <FormError name="release_date" />
 
+              <FieldArray
+                name="genre"
+                render={({ push, remove }) => (
+                  <Box>
+                    <Typography fontWeight="bold" mb="15px">
+                      Genres:
+                    </Typography>
+                    <Box display="flex" flexDirection="column" gap="15px">
+                      {values.genre.length
+                        ? (values.genre as string[]).map(
+                            (genre: string, index: number) => (
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                gap="5px"
+                                width="100%"
+                              >
+                                <Field
+                                  as={TextField}
+                                  width="100%"
+                                  variant="outlined"
+                                  name={`genre.${index}`}
+                                  required
+                                />
+                                <IconButton onClick={() => remove(index)}>
+                                  <RemoveIcon />
+                                </IconButton>
+                              </Box>
+                            )
+                          )
+                        : null}
+                      <Button onClick={() => push("")}>Add a genre</Button>
+                    </Box>
+                  </Box>
+                )}
+              />
+              <FormError name="genre" />
+
               <Typography fontWeight="bold">Description:</Typography>
               <Field
                 as={TextField}
